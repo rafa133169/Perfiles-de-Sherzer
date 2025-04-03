@@ -24,16 +24,17 @@ cdkStack.templateOptions.transforms = ["AWS::Serverless-2016-10-31"];
 const createLambda = (id: string, handler: string) => {
   return new aws_lambda_nodejs.NodejsFunction(cdkStack, id, {
     entry: path.join(__dirname, "functions", handler),
+    bundling: {
+      nodeModules: ["@aws-sdk/client-dynamodb", "@aws-sdk/lib-dynamodb"],
+      forceDockerBundling: false, // Desactiva Docker
+      minify: false,
+      sourceMap: false,
+      target: "node18",
+      externalModules: ["aws-sdk"]
+    },
     environment: {
       ALUMNO_TABLE: backend.data.resources.tables.Alumno.tableName,
       EVALUACION_TABLE: backend.data.resources.tables.Evaluacion.tableName,
-    },
-    bundling: {
-      nodeModules: ["@aws-sdk/client-dynamodb", "@aws-sdk/lib-dynamodb"],
-      forceDockerBundling: true, // Fuerza el uso de Docker
-      dockerImage: cdk.DockerImage.fromRegistry(
-        "public.ecr.aws/sam/build-nodejs18.x:latest"
-      ),
     },
   });
 };
