@@ -23,7 +23,8 @@ const createLambda = (id: string, handler: string) => {
   return new aws_lambda_nodejs.NodejsFunction(cdkStack, id, {
     entry: path.join(__dirname, "functions", handler),
     environment: {
-      TABLE_NAME: backend.data.resources.tables.Articulo.tableName,
+      ALUMNO_TABLE: backend.data.resources.tables.Alumno.tableName,
+      EVALUACION_TABLE: backend.data.resources.tables.Evaluacion.tableName,
     },
     bundling: {
       nodeModules: ["@aws-sdk/client-dynamodb", "@aws-sdk/lib-dynamodb"],
@@ -31,21 +32,34 @@ const createLambda = (id: string, handler: string) => {
   });
 };
 
-// Crear funciones Lambda
+// Crear funciones Lambda específicas para el proyecto
 const functions = {
-  getAll: createLambda("GetAllArticulosFn", "getAllArticulos.ts"),
-  getByMaterial: createLambda(
-    "GetArticulosByMaterialFn",
-    "getArticulosByMaterial.ts"
+  crearAlumno: createLambda("CrearAlumnoFn", "crearAlumno.ts"),
+  listarAlumnos: createLambda("ListarAlumnosFn", "listarAlumnos.ts"),
+  obtenerEvaluaciones: createLambda(
+    "ObtenerEvaluacionesFn",
+    "obtenerEvaluaciones.ts"
   ),
-  vender: createLambda("VenderArticuloFn", "venderArticulo.ts"),
-  calcularPeso: createLambda("CalcularPesoTotalFn", "calcularPesoTotal.ts"),
+  actualizarEvaluacion: createLambda(
+    "ActualizarEvaluacionFn",
+    "actualizarEvaluacion.ts"
+  ),
+  generarReporte: createLambda("GenerarReporteFn", "generarReporte.ts"),
 };
 
-// Asignar permisos
-backend.data.resources.tables.Articulo.grantReadData(functions.getAll);
-backend.data.resources.tables.Articulo.grantReadData(functions.getByMaterial);
-backend.data.resources.tables.Articulo.grantReadWriteData(functions.vender);
-backend.data.resources.tables.Articulo.grantReadData(functions.calcularPeso);
+// Asignar permisos a las tablas
+backend.data.resources.tables.Alumno.grantReadWriteData(functions.crearAlumno);
+backend.data.resources.tables.Alumno.grantReadData(functions.listarAlumnos);
+backend.data.resources.tables.Evaluacion.grantReadData(
+  functions.obtenerEvaluaciones
+);
+backend.data.resources.tables.Evaluacion.grantReadWriteData(
+  functions.actualizarEvaluacion
+);
+backend.data.resources.tables.Alumno.grantReadData(functions.generarReporte);
+backend.data.resources.tables.Evaluacion.grantReadData(
+  functions.generarReporte
+);
 
+// Exportar el backend configurado
 export default backend;

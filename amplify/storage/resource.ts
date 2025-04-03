@@ -1,11 +1,11 @@
 import { defineStorage } from "@aws-amplify/backend";
 
 export const storage = defineStorage({
-  name: "alumnosStorage",
+  name: "amplifyViteReactStorage",
   access: (allow) => ({
-    "alumnos-fotos/*": [
-      allow.authenticated.to(["read", "write"]),
+    "fotos-alumnos/*": [
       allow.guest.to(["read"]),
+      allow.authenticated.to(["read", "write", "delete"]),
     ],
   }),
 });
