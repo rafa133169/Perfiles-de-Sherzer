@@ -14,7 +14,7 @@ const schema = a
         nombre: a.string().required(),
         apellido: a.string().required(),
         foto: a.string(),
-        createdAt: a.datetime().default(() => new Date().toISOString()),
+        createdAt: a.string(),
         evaluaciones: a.hasMany("Evaluacion", "alumnoId"),
       })
       .authorization((allow) => [allow.authenticated()]),
