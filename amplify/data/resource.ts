@@ -8,19 +8,26 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
 const schema = a
   .schema({
-    Articulo: a.model({
-      id: a.id().required(),
-      nombre: a.string().required(),
-      fechaIngreso: a.string().required(), // Cambiado de datetime a string
-      tipoMaterial: a.string().required(),
-      pesoUnitario: a.float().required(),
-      cantidad: a.integer().required(),
-      vendido: a.boolean().default(false),
-      fechaVenta: a.string(), // Cambiado de date a string
-      precioVenta: a.float(),
-      descripcion: a.string(),
-      imagen: a.string(),
-    }),
+    Alumno: a
+      .model({
+        id: a.id().required(),
+        nombre: a.string().required(),
+        apellido: a.string().required(),
+        foto: a.string(),
+        createdAt: a.string().required(),
+        evaluaciones: a.hasMany("Evaluacion", "alumnoId"),
+      })
+      .authorization((allow) => [allow.authenticated()]),
+
+    Evaluacion: a
+      .model({
+        id: a.id().required(),
+        tipo: a.enum(["suma", "resta", "multiplicacion", "division"]),
+        nivel: a.enum(["inicio_de_proceso", "en_proceso", "proceso_completo"]),
+        alumnoId: a.string().required(),
+        alumno: a.belongsTo("Alumno", "alumnoId"),
+      })
+      .authorization((allow) => [allow.authenticated()]),
   })
   .authorization((allow) => [allow.authenticated()]);
 
