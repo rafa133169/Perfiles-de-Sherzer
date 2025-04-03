@@ -4,6 +4,7 @@ import { data } from "./data/resource";
 import { aws_lambda_nodejs } from "aws-cdk-lib";
 import { fileURLToPath } from "url";
 import path from "path";
+import * as cdk from "aws-cdk-lib";
 
 // Obtener __dirname equivalente en ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -15,10 +16,11 @@ const backend = defineBackend({
   data,
 });
 
-// Acceder al stack de CDK
-const cdkStack = backend.data.stack;
+// Configuración especial para Windows
+const cdkStack = backend.data.stack as cdk.Stack;
+cdkStack.templateOptions.transforms = ["AWS::Serverless-2016-10-31"];
 
-// Función helper para crear Lambda functions
+// Función helper modificada para Windows
 const createLambda = (id: string, handler: string) => {
   return new aws_lambda_nodejs.NodejsFunction(cdkStack, id, {
     entry: path.join(__dirname, "functions", handler),
@@ -28,10 +30,15 @@ const createLambda = (id: string, handler: string) => {
     },
     bundling: {
       nodeModules: ["@aws-sdk/client-dynamodb", "@aws-sdk/lib-dynamodb"],
+      forceDockerBundling: true, // Fuerza el uso de Docker
+      dockerImage: cdk.DockerImage.fromRegistry(
+        "public.ecr.aws/sam/build-nodejs18.x:latest"
+      ),
     },
   });
 };
 
+// Resto de tu configuración de funciones permanece igual...
 // Crear funciones Lambda específicas para el proyecto
 const functions = {
   crearAlumno: createLambda("CrearAlumnoFn", "crearAlumno.ts"),
